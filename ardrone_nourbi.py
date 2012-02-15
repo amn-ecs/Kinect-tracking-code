@@ -9,7 +9,6 @@ class CommandData(liblo.Server):
 
         #ALT = self.drone.navdata['altitude']
         #print ALT
-        print "Startup - trimming drone"
         self.drone.trim()
 
         try:
@@ -32,90 +31,83 @@ class CommandData(liblo.Server):
         print s
         if self.debug:
             print "Received command: '%s'" % s
-        if s == 'takeoff':
+
+
+        if s == 'emergency':
+            print "Emergency\n"
+            self.drone.reset()
+        elif s == 'takeoff':
             print "Takeoff\n"
             self.drone.takeoff()
-            pass
-        if s == 'landing':
+        elif s == 'landing':
             print "Landing\n"
             self.drone.land()
-            pass
+        elif s == 'trim':
+            print "Trim\n"
+            self.drone.trim()
+
+        # Move up
         if s == 'u':
-            #self.drone.speedZ = 0.4
-            self.drone.move_up()
+            self.drone.set_speed_updown(0.5)
+        elif s == 'nu':
+            self.drone.set_speed_updown(0.0)
+
+        # Move down
         elif s == 'd':
-            #self.drone.speedZ = -0.4
-            #mode ar drone down...
-            self.drone.move_down()
-        if s == 'nu':
-            #self.drone.speedZ = 0
-            self.drone.move_down()
+            self.drone.set_speed_updown(-0.4)
         elif s == 'nd':
-            #self.drone.speedZ = 0
-            #mode ar drone down...
-            self.drone.move_up()
+            self.drone.set_speed_updown(0.0)
+
+        # Move forward
         elif s == 'f':
-            #self.drone.speedY = -0.1
-            # forward
-            self.drone.move_forward()
-            pass
+            self.drone.set_speed_forwardback(-0.1)
         elif s == 'nf':
-            #self.drone.speedY = 0.0
-            self.drone.move_backward()
-            # forward
-            pass
+            self.drone.set_speed_forwardback(0.0)
+
+        # Move back
         elif s == 'b':
-            #self.drone.speedY = 0.1
-            self.drone.move_backward()
-            # back
-            pass
+            self.drone.set_speed_forwardback(0.1)
         elif s == 'nb':
-            self.drone.speedY = 0.1
-            self.drone.move_forward()
-            # back
-            pass
+            self.drone.set_speed_forwardback(0.0)
+
+        # Rotate right
         elif s == 'rr':
-            #self.drone.speedYaw = -0.5
-            # forward
-            self.drone.turn_right()
-            pass
+            self.drone.set_speed_yaw(0.5)
         elif s == 'nrr':
-            #self.drone.speedYaw = 0.0
-            # forward
-            self.drone.turn_left()
-            pass
+            self.drone.set_speed_yaw(0.0)
+
+        # Rotate left
         elif s == 'rl':
-            #self.drone.speedYaw = 0.5
-            # back
-            self.drone.turn_left()
-            pass
+            self.drone.set_speed_yaw(-0.5)
         elif s == 'nrl':
-            #self.drone.speedYaw = 0.0
-            # back
-            self.drone.turn_right()
-            pass
+            self.drone.set_speed_yaw(0.0)
+
+        # Move left
         elif s == 'yl':
-            #self.drone.speedX = -0.5
-            # forward
-            self.drone.move_left()
-            pass
+            self.drone.set_speed_leftright(-0.1)
         elif s == 'nyl':
-            #self.drone.speedX = 0.0
-            # forward
-            self.drone.move_right()
-            pass
+            self.drone.set_speed_leftright(0.0)
+
+        # Move right
         elif s == 'yr':
-            #self.drone.speedX = 0.5
-            # back
-            self.drone.move_right()
-            pass
+            self.drone.set_speed_leftright(0.1)
         elif s == 'nyr':
-            #self.drone.speedX = 0.0
-            # back
-            self.drone.move_left()
-            pass
+            self.drone.set_speed_leftright(0.0)
+
+        # Change video feed mode (front, lower, 2x PiP)
+        elif s == 'vid_front':
+            self.drone.set_video_mode('front')
+        elif s == 'vid_lower':
+            self.drone.set_video_mode('lower')
+        elif s == 'vid_pip_front':
+            self.drone.set_video_mode('pip_front')
+        elif s == 'vid_pip_lower':
+            self.drone.set_video_mode('pip_lower')
     
-    
+    # Safely shuts down the drone
+    def shutdown(self):
+        self.drone.halt()
+
     def fallback(self, path, args, types, src):
         if self.debug:
             print "got unknown message '%s' from '%s'" % (path, src.get_url())
@@ -137,4 +129,5 @@ if __name__ == "__main__":
             try:
                 server.recv(100)
             except KeyboardInterrupt:
+                server.shutdown()
                 sys.exit(0)

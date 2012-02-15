@@ -162,12 +162,65 @@ def main():
     while 1:
         commands = []
         event = pygame.event.poll()
+
+        # Exit conditions
         if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
             break
-        if event.type == KEYDOWN and event.key == K_t:
+
+        # Takeoff and landing
+        elif event.type == KEYDOWN and event.key == K_t:
             commands.append('takeoff')
-        if event.type == KEYDOWN and event.key == K_l:
+        elif event.type == KEYDOWN and event.key == K_SPACE:
             commands.append('landing')
+
+        # Manual trim
+        elif event.type == KEYDOWN and event.key == K_RETURN:
+            commands.append('trim')
+
+        # Backspace - set/unset emergency condition
+        # Handy as a last-resort to make it fall out of the sky,
+        # and also to reset the drone after a bad landing.
+        elif event.type == KEYDOWN and event.key == K_BACKSPACE:
+            commands.append('emergency')
+
+        # WSAD controls for moving around
+        elif event.type == KEYDOWN and event.key == K_w:
+            commands.append('f')
+        elif event.type == KEYUP and event.key == K_w:
+            commands.append('nf')
+        elif event.type == KEYDOWN and event.key == K_s:
+            commands.append('b')
+        elif event.type == KEYUP and event.key == K_s:
+            commands.append('nb')
+        elif event.type == KEYDOWN and event.key == K_a:
+            commands.append('yl')
+        elif event.type == KEYUP and event.key == K_a:
+            commands.append('nyl')
+        elif event.type == KEYDOWN and event.key == K_d:
+            commands.append('yr')
+        elif event.type == KEYUP and event.key == K_d:
+            commands.append('nyr')
+
+        # Q and E to rotate left/right
+        elif event.type == KEYDOWN and event.key == K_q:
+            commands.append('rl')
+        elif event.type == KEYUP and event.key == K_q:
+            commands.append('nrl')
+        elif event.type == KEYDOWN and event.key == K_e:
+            commands.append('rr')
+        elif event.type == KEYUP and event.key == K_e:
+            commands.append('nrr')
+
+        # P and L to increase/decrease altitude
+        elif event.type == KEYDOWN and event.key == K_p:
+            commands.append('u')
+        elif event.type == KEYUP and event.key == K_p:
+            commands.append('nu')
+        elif event.type == KEYDOWN and event.key == K_l:
+            commands.append('d')
+        elif event.type == KEYUP and event.key == K_l:
+            commands.append('nd')
+        
         for target in targets:
             for command in commands: 
                 print commands
@@ -205,16 +258,16 @@ def main():
            
             if abs(dr) > rotate_threshold and dh > arms_out_threshold:
                 if dr<0:
-                    if c.update(player, 'rl', True):
-                        commands.append('rl')
-                else:
                     if c.update(player, 'rr', True):
                         commands.append('rr')
+                else:
+                    if c.update(player, 'rl', True):
+                        commands.append('rl')
             else:
-                if c.update(player, 'rl', False):
-                    commands.append('nrl')
                 if c.update(player, 'rr', False):
                     commands.append('nrr')
+                if c.update(player, 'rl', False):
+                    commands.append('nrl')
 
             if abs(dside) > side_threshold and dh > arms_out_threshold:
                 if dside<0:
